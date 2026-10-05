@@ -1,0 +1,4971 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
+
+<title>Plot CAD Tool</title>
+
+<style>
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+
+    margin: 0;
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #f3f4f6;
+}
+
+
+/* =====================================================
+   TOP BAR
+===================================================== */
+
+#topBar {
+
+    height: 72px;
+
+    background: white;
+
+    border-bottom:
+        1px solid #d4d4d4;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 8px 14px;
+
+    position: relative;
+
+    z-index: 20;
+
+}
+
+
+#titleArea {
+
+    line-height: 1.25;
+
+}
+
+
+#titleArea strong {
+
+    font-size: 17px;
+
+}
+
+
+#titleArea small {
+
+    color: #666;
+
+    font-size: 11px;
+
+}
+
+
+#controls {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    flex-wrap: wrap;
+
+}
+
+
+button {
+
+    border: none;
+
+    border-radius: 5px;
+
+    padding: 8px 10px;
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    background: #e8e8e8;
+
+}
+
+
+button:hover {
+
+    background: #d8d8d8;
+
+}
+
+
+button.active {
+
+    background: #1769e0;
+
+    color: white;
+
+}
+
+
+#finishButton {
+
+    background: #1769e0;
+
+    color: white;
+
+}
+
+
+/* =====================================================
+   SCALE CONTROL
+===================================================== */
+
+.scaleBox {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    font-size: 11px;
+
+    margin-right: 4px;
+
+}
+
+
+.scaleBox input {
+
+    width: 58px;
+
+    height: 29px;
+
+    border:
+        1px solid #aaa;
+
+    border-radius: 4px;
+
+    padding: 4px;
+
+}
+
+
+.scaleBox select {
+
+    height: 29px;
+
+    border:
+        1px solid #aaa;
+
+    border-radius: 4px;
+
+    padding: 3px;
+
+}
+
+
+/* =====================================================
+   CANVAS
+===================================================== */
+
+#canvasContainer {
+
+    position: relative;
+
+    width: 100%;
+
+    height:
+        calc(100vh - 72px);
+
+    background: white;
+
+}
+
+
+#canvas {
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+
+    touch-action: none;
+
+    cursor: crosshair;
+
+}
+
+
+/* =====================================================
+   INFO PANEL
+===================================================== */
+
+#infoPanel {
+
+    position: absolute;
+
+    left: 12px;
+    top: 12px;
+
+    width: 250px;
+
+    background:
+        rgba(255,255,255,0.96);
+
+    border-radius: 8px;
+
+    padding: 12px;
+
+    box-shadow:
+        0 2px 12px
+        rgba(0,0,0,0.14);
+
+    pointer-events: none;
+
+    font-size: 11px;
+
+}
+
+
+#infoPanel h3 {
+
+    margin:
+        0 0 9px 0;
+
+    font-size: 15px;
+
+}
+
+
+.infoRow {
+
+    margin-bottom: 6px;
+
+}
+
+
+.infoRow strong {
+
+    color: #111;
+
+}
+
+
+#status {
+
+    border-top:
+        1px solid #ddd;
+
+    margin-top: 9px;
+
+    padding-top: 8px;
+
+    line-height: 1.35;
+
+    font-weight: bold;
+
+}
+
+
+/* =====================================================
+   TUTORIAL
+===================================================== */
+
+#tutorial {
+
+    position: absolute;
+
+    right: 12px;
+    top: 12px;
+
+    width: 280px;
+
+    background:
+        rgba(255,255,255,0.96);
+
+    border-radius: 8px;
+
+    padding: 12px;
+
+    box-shadow:
+        0 2px 12px
+        rgba(0,0,0,0.14);
+
+    pointer-events: none;
+
+    font-size: 11px;
+
+    line-height: 1.4;
+
+}
+
+
+#tutorial h3 {
+
+    margin:
+        0 0 8px 0;
+
+    font-size: 15px;
+
+}
+
+
+.step {
+
+    margin-bottom: 7px;
+
+}
+
+
+.key {
+
+    background: #eee;
+
+    border:
+        1px solid #ccc;
+
+    border-radius: 3px;
+
+    padding: 1px 4px;
+
+    font-weight: bold;
+
+}
+
+
+/* =====================================================
+   DYNAMIC INPUT
+===================================================== */
+
+#dynamicInput {
+
+    position: absolute;
+
+    display: none;
+
+    background:
+        rgba(255,255,255,0.97);
+
+    border:
+        1px solid #aaa;
+
+    border-radius: 6px;
+
+    padding: 7px;
+
+    box-shadow:
+        0 2px 10px
+        rgba(0,0,0,0.18);
+
+    z-index: 15;
+
+    pointer-events: none;
+
+    font-size: 11px;
+
+}
+
+
+.dynamicRow {
+
+    margin-bottom: 3px;
+
+}
+
+
+.dynamicRow:last-child {
+
+    margin-bottom: 0;
+
+}
+
+
+.dynamicValue {
+
+    font-weight: bold;
+
+    font-size: 13px;
+
+}
+
+
+/* =====================================================
+   BOTTOM HELP
+===================================================== */
+
+#bottomHelp {
+
+    position: absolute;
+
+    bottom: 10px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    background:
+        rgba(255,255,255,0.94);
+
+    padding:
+        7px 12px;
+
+    border-radius: 6px;
+
+    box-shadow:
+        0 2px 8px
+        rgba(0,0,0,0.12);
+
+    font-size: 11px;
+
+    white-space: nowrap;
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:850px) {
+
+    #topBar {
+
+        height: 105px;
+
+        align-items: flex-start;
+
+    }
+
+
+    #controls {
+
+        max-width: 65%;
+
+    }
+
+
+    #titleArea strong {
+
+        font-size: 13px;
+
+    }
+
+
+    #tutorial {
+
+        display: none;
+
+    }
+
+
+    #infoPanel {
+
+        width: 205px;
+
+    }
+
+
+    #bottomHelp {
+
+        font-size: 9px;
+
+    }
+
+}
+
+
+
+/* =====================================================
+   HOUSE SPACE PLANNER
+===================================================== */
+#plannerPanel{position:absolute;right:12px;top:12px;width:310px;max-height:calc(100% - 24px);overflow:auto;background:rgba(255,255,255,.98);border:1px solid #cfd4dc;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:14px;z-index:25;display:none;font-size:11px}
+#plannerPanel h3{margin:0 0 4px;font-size:17px} #plannerPanel .sub{color:#666;margin-bottom:10px;line-height:1.35}
+.planSection{border-top:1px solid #e5e7eb;padding-top:10px;margin-top:10px}.planSection:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.planGrid{display:grid;grid-template-columns:1fr 72px;gap:6px 8px;align-items:center}.planGrid input{width:100%;height:28px;border:1px solid #bfc5ce;border-radius:5px;padding:4px 6px}.planGrid label{font-weight:600}.planButtons{display:flex;gap:6px;margin-top:12px}.planButtons button{flex:1}.primaryPlan{background:#1769e0;color:white}
+#planSummary{background:#f8fafc;border:1px solid #e5e7eb;border-radius:7px;padding:8px;margin-top:10px;line-height:1.45}.planWarning{color:#9a3412;font-weight:700}.planGood{color:#166534;font-weight:700}.planHint{font-size:10px;color:#666;margin-top:6px}.roomLegend{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px}.legendItem{display:flex;align-items:center;gap:5px}.legendSwatch{width:12px;height:12px;border:1px solid #888;border-radius:2px}
+@media(max-width:850px){#plannerPanel{width:285px;top:8px;right:8px;max-height:70%}}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     TOP BAR
+===================================================== -->
+
+<div id="topBar">
+
+
+    <div id="titleArea">
+
+        <strong>
+            Plot CAD Drawing Tool
+        </strong>
+
+        <br>
+
+        <small>
+            CAD-style site / plot drawing
+        </small>
+
+    </div>
+
+
+    <div id="controls">
+
+
+        <!-- SCALE -->
+
+        <div class="scaleBox">
+
+            <span>
+                1 unit =
+            </span>
+
+            <input
+                id="scaleInput"
+                type="number"
+                value="1"
+                min="0.001"
+                step="any">
+
+            <select id="unitSelect">
+
+                <option value="ft">
+                    ft
+                </option>
+
+                <option value="m">
+                    m
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            id="orthoButton"
+            onclick="toggleOrtho()">
+
+            F8 Ortho
+
+        </button>
+
+
+        <button
+            id="polarButton"
+            onclick="togglePolar()">
+
+            F10 Polar
+
+        </button>
+
+
+        <button
+            id="parallelButton"
+            onclick="toggleParallel()">
+
+            Parallel
+
+        </button>
+
+
+        <button
+            id="perpendicularButton"
+            onclick="togglePerpendicular()">
+
+            Perpendicular
+
+        </button>
+
+
+        <button
+            id="dimensionButton"
+            onclick="toggleDimensions()">
+
+            Dimensions: ON
+
+        </button>
+
+
+        <button
+            onclick="undoPoint()">
+
+            Undo
+
+        </button>
+
+
+        <button
+            onclick="clearDrawing()">
+
+            Clear
+
+        </button>
+
+
+        <button onclick="openPlanner()">House Planner</button>
+
+        <button
+            id="finishButton"
+            onclick="finishPlot()">
+
+            Finish Plot
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CANVAS AREA
+===================================================== -->
+
+<div id="canvasContainer">
+
+
+    <canvas id="canvas"></canvas>
+
+
+    <!-- =================================================
+         INFO
+    ================================================== -->
+
+    <div id="infoPanel">
+
+        <h3>
+            Drawing Information
+        </h3>
+
+
+        <div class="infoRow">
+
+            Scale:
+            <strong id="scaleDisplay">
+                1 unit = 1 ft
+            </strong>
+
+        </div>
+
+
+        <div class="infoRow">
+
+            Grid:
+            <strong>
+                1 drawing unit
+            </strong>
+
+        </div>
+
+
+        <div class="infoRow">
+
+            Snap:
+            <strong>
+                0.5 drawing unit
+            </strong>
+
+        </div>
+
+
+        <div class="infoRow">
+
+            Points:
+            <strong id="pointCount">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="infoRow">
+
+            Segments:
+            <strong id="segmentCount">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="infoRow">
+
+            Area:
+            <strong>
+                <span id="areaValue">
+                    0.00
+                </span>
+                <span id="areaUnit">
+                    ft²
+                </span>
+            </strong>
+
+        </div>
+
+
+        <div class="infoRow">
+
+            Perimeter:
+            <strong>
+                <span id="perimeterValue">
+                    0.00
+                </span>
+                <span id="perimeterUnit">
+                    ft
+                </span>
+            </strong>
+
+        </div>
+
+
+        <div class="infoRow">
+
+            Cursor:
+            <strong id="cursorInfo">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="infoRow">
+
+            Current Line:
+            <strong id="lineInfo">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="infoRow">
+
+            Mode:
+            <strong id="modeInfo">
+                Free
+
+            </strong>
+
+        </div>
+
+
+        <div id="status">
+
+            Click anywhere to create P1.
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         TUTORIAL
+    ================================================== -->
+
+    <div id="tutorial">
+
+        <h3>
+            Quick Tutorial
+        </h3>
+
+
+        <div class="step">
+
+            <strong>1.</strong>
+
+            Click anywhere to create
+            <strong>P1</strong>.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>2.</strong>
+
+            Move the pointer.
+            The live
+            <strong>length + angle</strong>
+            appear automatically.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>3.</strong>
+
+            Simply click for normal
+            grid-snapped drawing.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>4.</strong>
+
+            Type a number while moving
+            the pointer to lock the
+            <strong>length</strong>.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>5.</strong>
+
+            Type an angle followed by
+            <strong>A</strong>
+            to lock the exact angle.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>6.</strong>
+
+            Press
+            <span class="key">Enter</span>
+            to create the line.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>7.</strong>
+
+            <span class="key">F8</span>
+            = exact horizontal/vertical.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>8.</strong>
+
+            <span class="key">F10</span>
+            = polar tracking.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>9.</strong>
+
+            Parallel / Perpendicular
+            can lock the line relative
+            to an existing boundary.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>10.</strong>
+
+            Return to
+            <strong>P1</strong>
+            to close the plot.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>11.</strong>
+
+            <span class="key">D</span>
+            toggles dimensions.
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         DYNAMIC INPUT
+    ================================================== -->
+
+    <div id="dynamicInput">
+
+        <div class="dynamicRow">
+
+            Length:
+            <span
+                id="dynamicLength"
+                class="dynamicValue">
+
+                —
+
+            </span>
+
+        </div>
+
+
+        <div class="dynamicRow">
+
+            Angle:
+            <span
+                id="dynamicAngle"
+                class="dynamicValue">
+
+                —
+
+            </span>
+
+        </div>
+
+
+        <div class="dynamicRow">
+
+            <span id="dynamicMode">
+                Free
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div id="bottomHelp">
+
+        Type length directly →
+        <strong>Enter</strong>
+        |
+        Type angle →
+        <strong>A</strong>
+        |
+        <strong>Esc</strong>
+        clear constraints
+        |
+        <strong>D</strong>
+        dimensions
+
+    </div>
+
+</div>
+
+    <!-- HOUSE PLANNER -->
+    <div id="plannerPanel">
+        <h3>House Space Planner</h3>
+        <div class="sub">Uses the finished closed plot, creates a no-build setback zone, then fits the requested spaces inside the remaining buildable area.</div>
+        <div class="planSection">
+            <div class="planGrid">
+                <label>Number of floors</label><input id="pFloors" type="number" min="1" max="10" value="1">
+                <label>Setback / no-build zone</label><input id="pSetback" type="number" min="0" step="0.5" value="5">
+                <label>Corridor width</label><input id="pCorridor" type="number" min="2" step="0.5" value="4">
+            </div>
+            <div class="planHint">Setback is uniform around the plot and uses the CAD unit currently selected.</div>
+        </div>
+        <div class="planSection"><strong>Bedrooms</strong><div class="planGrid" style="margin-top:7px">
+            <label>Master bedrooms</label><input id="pMaster" type="number" min="0" max="20" value="1">
+            <label>Standard bedrooms</label><input id="pBeds" type="number" min="0" max="20" value="2">
+            <label>Bathrooms</label><input id="pBaths" type="number" min="0" max="20" value="3">
+        </div></div>
+        <div class="planSection"><strong>Common / service spaces</strong><div class="planGrid" style="margin-top:7px">
+            <label>Living rooms</label><input id="pLiving" type="number" min="0" max="10" value="1">
+            <label>Dining rooms</label><input id="pDining" type="number" min="0" max="10" value="1">
+            <label>Kitchens</label><input id="pKitchen" type="number" min="0" max="10" value="1">
+            <label>Utility / laundry</label><input id="pUtility" type="number" min="0" max="10" value="0">
+            <label>Staircases</label><input id="pStairs" type="number" min="0" max="10" value="1">
+        </div></div>
+        <div class="planSection"><strong>Outdoor / other</strong><div class="planGrid" style="margin-top:7px">
+            <label>Gardens</label><input id="pGarden" type="number" min="0" max="10" value="1">
+            <label>Courtyards</label><input id="pCourt" type="number" min="0" max="10" value="0">
+            <label>Parking spaces</label><input id="pParking" type="number" min="0" max="10" value="2">
+        </div></div>
+        <div class="planButtons"><button class="primaryPlan" onclick="generateHouseLayout()">Generate Layout</button><button onclick="clearHouseLayout()">Clear</button></div>
+        <div class="planButtons"><button onclick="togglePlanner()">Hide Planner</button><button onclick="generateHouseLayout(true)">Regenerate</button></div>
+        <div id="planSummary">Finish a closed plot first, then generate the floor plan.</div>
+        <div class="roomLegend" id="roomLegend"></div>
+    </div>
+
+
+
+<script>
+
+
+// =====================================================
+// CANVAS
+// =====================================================
+
+const canvas =
+    document.getElementById(
+        "canvas"
+    );
+
+
+const ctx =
+    canvas.getContext(
+        "2d"
+    );
+
+
+// =====================================================
+// DRAWING SCALE
+// =====================================================
+
+let realWorldPerUnit = 1;
+
+let selectedUnit = "ft";
+
+const PIXELS_PER_UNIT = 40;
+
+const GRID_SPACING = 1;
+
+const SNAP_SPACING = 0.5;
+
+
+// =====================================================
+// DRAWING STATE
+// =====================================================
+
+let points = [];
+
+let shapeClosed = false;
+
+let currentPointer = null;
+
+let snappedPoint = null;
+
+let snapType = null;
+
+
+// =====================================================
+// CAD MODES
+// =====================================================
+
+let orthoMode = false;
+
+let polarMode = false;
+
+let parallelMode = false;
+
+let perpendicularMode = false;
+
+let dimensionsVisible = true;
+
+
+// =====================================================
+// USER CONSTRAINTS
+// =====================================================
+
+let lockedLength = null;
+
+let lockedAngle = null;
+
+
+// =====================================================
+// ORIGIN
+// =====================================================
+
+let origin = {
+
+    x: 80,
+
+    y: 0
+
+};
+
+
+// =====================================================
+// RESIZE
+// =====================================================
+
+function resizeCanvas() {
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+
+    canvas.width =
+        rect.width * dpr;
+
+
+    canvas.height =
+        rect.height * dpr;
+
+
+    ctx.setTransform(
+
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+
+    );
+
+
+    origin.x = 80;
+
+
+    origin.y =
+        canvas.clientHeight - 55;
+
+
+    redraw();
+
+}
+
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+// =====================================================
+// SCALE CHANGE
+// =====================================================
+
+document
+    .getElementById(
+        "scaleInput"
+    )
+    .addEventListener(
+        "change",
+        updateScale
+    );
+
+
+document
+    .getElementById(
+        "unitSelect"
+    )
+    .addEventListener(
+        "change",
+        updateScale
+    );
+
+
+function updateScale() {
+
+    let value =
+        parseFloat(
+            document.getElementById(
+                "scaleInput"
+            ).value
+        );
+
+
+    if (
+        isNaN(value)
+        ||
+        value <= 0
+    ) {
+
+        value = 1;
+
+        document.getElementById(
+            "scaleInput"
+        ).value = 1;
+
+    }
+
+
+    realWorldPerUnit =
+        value;
+
+
+    selectedUnit =
+        document.getElementById(
+            "unitSelect"
+        ).value;
+
+
+    updateScaleDisplay();
+
+    redraw();
+
+}
+
+
+// =====================================================
+// SCALE DISPLAY
+// =====================================================
+
+function updateScaleDisplay() {
+
+    document.getElementById(
+        "scaleDisplay"
+    ).textContent =
+
+        "1 unit = "
+        +
+        realWorldPerUnit
+        +
+        " "
+        +
+        selectedUnit;
+
+
+    document.getElementById(
+        "areaUnit"
+    ).textContent =
+
+        selectedUnit
+        +
+        "²";
+
+
+    document.getElementById(
+        "perimeterUnit"
+    ).textContent =
+
+        selectedUnit;
+
+}
+
+
+// =====================================================
+// WORLD → SCREEN
+// =====================================================
+
+function worldToScreen(point) {
+
+    return {
+
+        x:
+            origin.x +
+            point.x *
+            PIXELS_PER_UNIT,
+
+        y:
+            origin.y -
+            point.y *
+            PIXELS_PER_UNIT
+
+    };
+
+}
+
+
+// =====================================================
+// SCREEN → WORLD
+// =====================================================
+
+function screenToWorld(point) {
+
+    return {
+
+        x:
+            (
+                point.x -
+                origin.x
+            )
+            /
+            PIXELS_PER_UNIT,
+
+        y:
+            (
+                origin.y -
+                point.y
+            )
+            /
+            PIXELS_PER_UNIT
+
+    };
+
+}
+
+
+// =====================================================
+// SNAP VALUE
+// =====================================================
+
+function snapValue(value) {
+
+    return (
+
+        Math.round(
+            value /
+            SNAP_SPACING
+        )
+        *
+        SNAP_SPACING
+
+    );
+
+}
+
+
+// =====================================================
+// DISTANCE
+// =====================================================
+
+function distance(a, b) {
+
+    const dx =
+        b.x - a.x;
+
+
+    const dy =
+        b.y - a.y;
+
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+
+}
+
+
+// =====================================================
+// ANGLE
+// =====================================================
+
+function calculateAngle(a, b) {
+
+    let angle =
+
+        Math.atan2(
+
+            b.y - a.y,
+
+            b.x - a.x
+
+        )
+        *
+        180
+        /
+        Math.PI;
+
+
+    return normalizeAngle(
+        angle
+    );
+
+}
+
+
+// =====================================================
+// NORMALIZE ANGLE
+// =====================================================
+
+function normalizeAngle(angle) {
+
+    angle =
+        angle % 360;
+
+
+    if (
+        angle < 0
+    ) {
+
+        angle += 360;
+
+    }
+
+
+    return angle;
+
+}
+
+
+// =====================================================
+// EXACT ENDPOINT
+// =====================================================
+
+function pointFromAngle(
+    start,
+    angle,
+    length
+) {
+
+    const radians =
+        angle *
+        Math.PI /
+        180;
+
+
+    return {
+
+        x:
+            start.x +
+            length *
+            Math.cos(
+                radians
+            ),
+
+        y:
+            start.y +
+            length *
+            Math.sin(
+                radians
+            )
+
+    };
+
+}
+
+
+// =====================================================
+// ANGLE DIFFERENCE
+// =====================================================
+
+function angleDifference(
+    a,
+    b
+) {
+
+    let d =
+        Math.abs(
+            normalizeAngle(a) -
+            normalizeAngle(b)
+        );
+
+
+    if (
+        d > 180
+    ) {
+
+        d =
+            360 - d;
+
+    }
+
+
+    return d;
+
+}
+
+
+// =====================================================
+// SNAP TO POLAR ANGLE
+// =====================================================
+
+function polarAngle(
+    angle
+) {
+
+    const increment = 15;
+
+
+    return (
+
+        Math.round(
+            angle /
+            increment
+        )
+        *
+        increment
+
+    );
+
+}
+
+
+// =====================================================
+// ORTHO ANGLE
+// =====================================================
+
+function orthoAngle(
+    angle
+) {
+
+    const angles = [
+
+        0,
+        90,
+        180,
+        270
+
+    ];
+
+
+    let best =
+        angles[0];
+
+
+    let difference =
+        Infinity;
+
+
+    for (
+        const a
+        of angles
+    ) {
+
+        const d =
+            angleDifference(
+                angle,
+                a
+            );
+
+
+        if (
+            d < difference
+        ) {
+
+            difference = d;
+
+            best = a;
+
+        }
+
+    }
+
+
+    return best;
+
+}
+
+
+// =====================================================
+// POINTER
+// =====================================================
+
+function pointerPosition(
+    event
+) {
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+
+    return {
+
+        x:
+            event.clientX -
+            rect.left,
+
+        y:
+            event.clientY -
+            rect.top
+
+    };
+
+}
+
+
+// =====================================================
+// GRID SNAP
+// =====================================================
+
+function gridSnap(
+    point
+) {
+
+    return {
+
+        x:
+            snapValue(
+                point.x
+            ),
+
+        y:
+            snapValue(
+                point.y
+            )
+
+    };
+
+}
+
+
+// =====================================================
+// GET BASE POINTER POINT
+// =====================================================
+
+function getBasePointerPoint(
+    screen
+) {
+
+    const world =
+        screenToWorld(
+            screen
+        );
+
+
+    return gridSnap(
+        world
+    );
+
+}
+
+
+// =====================================================
+// GET CLOSEST EXISTING SEGMENT
+// =====================================================
+
+function getReferenceSegment() {
+
+    if (
+        points.length < 2
+    ) {
+
+        return null;
+
+    }
+
+
+    return {
+
+        start:
+            points[
+                points.length - 2
+            ],
+
+        end:
+            points[
+                points.length - 1
+            ]
+
+    };
+
+}
+
+
+// =====================================================
+// REFERENCE SEGMENT ANGLE
+// =====================================================
+
+function referenceAngle() {
+
+    const segment =
+        getReferenceSegment();
+
+
+    if (
+        !segment
+    ) {
+
+        return null;
+
+    }
+
+
+    return calculateAngle(
+
+        segment.start,
+
+        segment.end
+
+    );
+
+}
+
+
+// =====================================================
+// GET DRAWING DIRECTION
+// =====================================================
+
+function getDrawingAngle(
+    start,
+    target
+) {
+
+    let angle =
+        calculateAngle(
+            start,
+            target
+        );
+
+
+    if (
+        lockedAngle !== null
+    ) {
+
+        return lockedAngle;
+
+    }
+
+
+    if (
+        perpendicularMode
+    ) {
+
+        const reference =
+            referenceAngle();
+
+
+        if (
+            reference !== null
+        ) {
+
+            const options = [
+
+                normalizeAngle(
+                    reference + 90
+                ),
+
+                normalizeAngle(
+                    reference - 90
+                )
+
+            ];
+
+
+            let best =
+                options[0];
+
+
+            let difference =
+                angleDifference(
+                    angle,
+                    options[0]
+                );
+
+
+            for (
+                const candidate
+                of options
+            ) {
+
+                const d =
+                    angleDifference(
+                        angle,
+                        candidate
+                    );
+
+
+                if (
+                    d < difference
+                ) {
+
+                    difference = d;
+
+                    best = candidate;
+
+                }
+
+            }
+
+
+            return best;
+
+        }
+
+    }
+
+
+    if (
+        parallelMode
+    ) {
+
+        const reference =
+            referenceAngle();
+
+
+        if (
+            reference !== null
+        ) {
+
+            return reference;
+
+        }
+
+    }
+
+
+    if (
+        orthoMode
+    ) {
+
+        return orthoAngle(
+            angle
+        );
+
+    }
+
+
+    if (
+        polarMode
+    ) {
+
+        return polarAngle(
+            angle
+        );
+
+    }
+
+
+    return angle;
+
+}
+
+
+// =====================================================
+// BUILD PREVIEW POINT
+// =====================================================
+
+function buildPreviewPoint() {
+
+    if (
+        !currentPointer
+        ||
+        points.length === 0
+    ) {
+
+        return null;
+
+    }
+
+
+    const start =
+        points[
+            points.length - 1
+        ];
+
+
+    const mouseWorld =
+        screenToWorld(
+            currentPointer
+        );
+
+
+    let base =
+        gridSnap(
+            mouseWorld
+        );
+
+
+    let angle =
+        getDrawingAngle(
+            start,
+            base
+        );
+
+
+    let length;
+
+
+    if (
+        lockedLength !== null
+    ) {
+
+        length =
+            lockedLength /
+            realWorldPerUnit;
+
+    }
+
+    else {
+
+        length =
+            distance(
+                start,
+                base
+            );
+
+    }
+
+
+    return pointFromAngle(
+
+        start,
+
+        angle,
+
+        length
+
+    );
+
+}
+
+
+// =====================================================
+// UPDATE POINTER
+// =====================================================
+
+canvas.addEventListener(
+    "pointermove",
+    function(event) {
+
+        currentPointer =
+            pointerPosition(
+                event
+            );
+
+
+        snappedPoint =
+            buildPreviewPoint();
+
+
+        updateDynamicInput();
+
+        redraw();
+
+    }
+);
+
+
+// =====================================================
+// POINTER DOWN
+// =====================================================
+
+canvas.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        if (
+            shapeClosed
+        ) {
+
+            return;
+
+        }
+
+
+        currentPointer =
+            pointerPosition(
+                event
+            );
+
+
+        if (
+            points.length === 0
+        ) {
+
+            const p =
+                getBasePointerPoint(
+                    currentPointer
+                );
+
+
+            points.push(p);
+
+
+            updateStatus(
+                "P1 created. Move the pointer to draw the first boundary."
+            );
+
+
+            redraw();
+
+            return;
+
+        }
+
+
+        if (
+            lockedLength !== null
+            ||
+            lockedAngle !== null
+        ) {
+
+            createConstrainedLine();
+
+            return;
+
+        }
+
+
+        let p =
+            buildPreviewPoint();
+
+
+        if (
+            !p
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            points.length >= 3
+            &&
+            distance(
+                p,
+                points[0]
+            )
+            <
+            0.35
+        ) {
+
+            if (
+                !wouldCreateIntersection(
+                    points[
+                        points.length - 1
+                    ],
+                    points[0],
+                    true
+                )
+            ) {
+
+                shapeClosed = true;
+
+                currentPointer = null;
+
+                snappedPoint = null;
+
+
+                updateStatus(
+                    "✓ Plot closed successfully."
+                );
+
+
+                redraw();
+
+                return;
+
+            }
+
+
+            updateStatus(
+                "⚠ Cannot close: plot boundary intersects another boundary."
+            );
+
+
+            return;
+
+        }
+
+
+        addPoint(p);
+
+    }
+);
+
+
+// =====================================================
+// ADD POINT
+// =====================================================
+
+function addPoint(point) {
+
+    const start =
+        points[
+            points.length - 1
+        ];
+
+
+    if (
+        wouldCreateIntersection(
+            start,
+            point,
+            false
+        )
+    ) {
+
+        updateStatus(
+            "⚠ Line rejected: it would create a self-intersection."
+        );
+
+
+        return;
+
+    }
+
+
+    points.push(point);
+
+
+    updateStatus(
+        "Point added. Continue drawing."
+    );
+
+
+    redraw();
+
+}
+
+
+// =====================================================
+// CREATE CONSTRAINED LINE
+// =====================================================
+
+function createConstrainedLine() {
+
+    const start =
+        points[
+            points.length - 1
+        ];
+
+
+    if (
+        !currentPointer
+    ) {
+
+        return;
+
+    }
+
+
+    const mouse =
+        screenToWorld(
+            currentPointer
+        );
+
+
+    let angle;
+
+
+    let length;
+
+
+    if (
+        lockedAngle !== null
+    ) {
+
+        angle =
+            lockedAngle;
+
+    }
+
+    else {
+
+        angle =
+            calculateAngle(
+                start,
+                mouse
+            );
+
+    }
+
+
+    if (
+        lockedLength !== null
+    ) {
+
+        length =
+            lockedLength /
+            realWorldPerUnit;
+
+    }
+
+    else {
+
+        length =
+            distance(
+                start,
+                mouse
+            );
+
+    }
+
+
+    if (
+        length <= 0
+    ) {
+
+        return;
+
+    }
+
+
+    const endpoint =
+        pointFromAngle(
+            start,
+            angle,
+            length
+        );
+
+
+    if (
+        wouldCreateIntersection(
+            start,
+            endpoint,
+            false
+        )
+    ) {
+
+        updateStatus(
+            "⚠ Line rejected: it would create a self-intersection."
+        );
+
+
+        return;
+
+    }
+
+
+    points.push(
+        endpoint
+    );
+
+
+    const realLength =
+        length *
+        realWorldPerUnit;
+
+
+    updateStatus(
+
+        "Created "
+        +
+        realLength.toFixed(2)
+        +
+        " "
+        +
+        selectedUnit
+        +
+        " @ "
+        +
+        angle.toFixed(2)
+        +
+        "°"
+
+    );
+
+
+    clearConstraints();
+
+    redraw();
+
+}
+
+
+// =====================================================
+// KEYBOARD
+// =====================================================
+
+let numberBuffer = "";
+
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "F8"
+        ) {
+
+            event.preventDefault();
+
+            toggleOrtho();
+
+            return;
+
+        }
+
+
+        if (
+            event.key === "F10"
+        ) {
+
+            event.preventDefault();
+
+            togglePolar();
+
+            return;
+
+        }
+
+
+        if (
+            event.key.toLowerCase()
+            === "d"
+            &&
+            !event.ctrlKey
+            &&
+            !event.metaKey
+        ) {
+
+            toggleDimensions();
+
+            return;
+
+        }
+
+
+        if (
+            event.key.toLowerCase()
+            === "p"
+            &&
+            !event.ctrlKey
+            &&
+            !event.metaKey
+        ) {
+
+            toggleParallel();
+
+            return;
+
+        }
+
+
+        if (
+            event.key.toLowerCase()
+            === "p"
+            &&
+            event.shiftKey
+        ) {
+
+            togglePerpendicular();
+
+            return;
+
+        }
+
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            numberBuffer = "";
+
+            clearConstraints();
+
+            return;
+
+        }
+
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            event.preventDefault();
+
+
+            if (
+                numberBuffer.length > 0
+            ) {
+
+                const value =
+                    parseFloat(
+                        numberBuffer
+                    );
+
+
+                if (
+                    !isNaN(value)
+                ) {
+
+                    lockedLength =
+                        value;
+
+                    numberBuffer = "";
+
+
+                    updateStatus(
+
+                        "Length locked at "
+                        +
+                        value.toFixed(3)
+                        +
+                        " "
+                        +
+                        selectedUnit
+                        +
+                        ". Enter angle with A or press Enter."
+
+                    );
+
+
+                    redraw();
+
+                    return;
+
+                }
+
+            }
+
+
+            if (
+                lockedLength !== null
+                ||
+                lockedAngle !== null
+            ) {
+
+                createConstrainedLine();
+
+            }
+
+            return;
+
+        }
+
+
+        if (
+            event.key.toLowerCase()
+            === "a"
+            &&
+            numberBuffer.length > 0
+        ) {
+
+            const value =
+                parseFloat(
+                    numberBuffer
+                );
+
+
+            if (
+                !isNaN(value)
+            ) {
+
+                lockedAngle =
+                    normalizeAngle(
+                        value
+                    );
+
+
+                numberBuffer = "";
+
+
+                updateStatus(
+
+                    "Exact angle locked at "
+                    +
+                    lockedAngle.toFixed(2)
+                    +
+                    "°. Press Enter to create."
+
+                );
+
+
+                redraw();
+
+            }
+
+
+            return;
+
+        }
+
+
+        if (
+            (
+                event.key >= "0"
+                &&
+                event.key <= "9"
+            )
+            ||
+            event.key === "."
+            ||
+            event.key === "-"
+        ) {
+
+            numberBuffer +=
+                event.key;
+
+
+            updateDynamicInput();
+
+
+            return;
+
+        }
+
+    }
+);
+
+
+// =====================================================
+// INPUT BOX SUPPORT
+// =====================================================
+
+function updateDynamicInput() {
+
+    const box =
+        document.getElementById(
+            "dynamicInput"
+        );
+
+
+    if (
+        points.length === 0
+        ||
+        !currentPointer
+    ) {
+
+        box.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    box.style.display =
+        "block";
+
+
+    let preview =
+        buildPreviewPoint();
+
+
+    if (
+        !preview
+    ) {
+
+        return;
+
+    }
+
+
+    const start =
+        points[
+            points.length - 1
+        ];
+
+
+    const drawingLength =
+        distance(
+            start,
+            preview
+        );
+
+
+    const realLength =
+        drawingLength *
+        realWorldPerUnit;
+
+
+    const angle =
+        calculateAngle(
+            start,
+            preview
+        );
+
+
+    document.getElementById(
+        "dynamicLength"
+    ).textContent =
+
+        realLength.toFixed(2)
+        +
+        " "
+        +
+        selectedUnit;
+
+
+    document.getElementById(
+        "dynamicAngle"
+    ).textContent =
+
+        angle.toFixed(2)
+        +
+        "°";
+
+
+    let mode = "Free";
+
+
+    if (
+        lockedLength !== null
+        &&
+        lockedAngle !== null
+    ) {
+
+        mode =
+            "EXACT LENGTH + ANGLE";
+
+    }
+    else if (
+        lockedLength !== null
+    ) {
+
+        mode =
+            "EXACT LENGTH";
+
+    }
+    else if (
+        lockedAngle !== null
+    ) {
+
+        mode =
+            "EXACT ANGLE";
+
+    }
+    else if (
+        orthoMode
+    ) {
+
+        mode =
+            "ORTHO";
+
+    }
+    else if (
+        perpendicularMode
+    ) {
+
+        mode =
+            "PERPENDICULAR";
+
+    }
+    else if (
+        parallelMode
+    ) {
+
+        mode =
+            "PARALLEL";
+
+    }
+    else if (
+        polarMode
+    ) {
+
+        mode =
+            "POLAR";
+
+    }
+
+
+    document.getElementById(
+        "dynamicMode"
+    ).textContent =
+        mode;
+
+
+    let left =
+        currentPointer.x + 18;
+
+
+    let top =
+        currentPointer.y + 18;
+
+
+    const maxLeft =
+        canvas.clientWidth - 170;
+
+
+    const maxTop =
+        canvas.clientHeight - 80;
+
+
+    left =
+        Math.min(
+            left,
+            maxLeft
+        );
+
+
+    top =
+        Math.min(
+            top,
+            maxTop
+        );
+
+
+    box.style.left =
+        left + "px";
+
+
+    box.style.top =
+        top + "px";
+
+}
+
+
+// =====================================================
+// CLEAR CONSTRAINTS
+// =====================================================
+
+function clearConstraints() {
+
+    lockedLength = null;
+
+    lockedAngle = null;
+
+    numberBuffer = "";
+
+
+    redraw();
+
+}
+
+
+// =====================================================
+// TOGGLE ORTHO
+// =====================================================
+
+function toggleOrtho() {
+
+    orthoMode =
+        !orthoMode;
+
+
+    if (
+        orthoMode
+    ) {
+
+        polarMode = false;
+
+        parallelMode = false;
+
+        perpendicularMode = false;
+
+    }
+
+
+    updateButtons();
+
+
+    updateStatus(
+
+        orthoMode
+            ? "F8 Ortho ON."
+            : "F8 Ortho OFF."
+
+    );
+
+
+    redraw();
+
+}
+
+
+// =====================================================
+// TOGGLE POLAR
+// =====================================================
+
+function togglePolar() {
+
+    polarMode =
+        !polarMode;
+
+
+    if (
+        polarMode
+    ) {
+
+        orthoMode = false;
+
+        parallelMode = false;
+
+        perpendicularMode = false;
+
+    }
+
+
+    updateButtons();
+
+
+    updateStatus(
+
+        polarMode
+            ? "F10 Polar Tracking ON. Increment = 15°."
+            : "F10 Polar Tracking OFF."
+
+    );
+
+
+    redraw();
+
+}
+
+
+// =====================================================
+// TOGGLE PARALLEL
+// =====================================================
+
+function toggleParallel() {
+
+    parallelMode =
+        !parallelMode;
+
+
+    if (
+        parallelMode
+    ) {
+
+        orthoMode = false;
+
+        polarMode = false;
+
+        perpendicularMode = false;
+
+    }
+
+
+    updateButtons();
+
+
+    updateStatus(
+
+        parallelMode
+            ? "Parallel mode ON."
+            : "Parallel mode OFF."
+
+    );
+
+
+    redraw();
+
+}
+
+
+// =====================================================
+// TOGGLE PERPENDICULAR
+// =====================================================
+
+function togglePerpendicular() {
+
+    perpendicularMode =
+        !perpendicularMode;
+
+
+    if (
+        perpendicularMode
+    ) {
+
+        orthoMode = false;
+
+        polarMode = false;
+
+        parallelMode = false;
+
+    }
+
+
+    updateButtons();
+
+
+    updateStatus(
+
+        perpendicularMode
+            ? "Perpendicular mode ON."
+            : "Perpendicular mode OFF."
+
+    );
+
+
+    redraw();
+
+}
+
+
+// =====================================================
+// BUTTON STATES
+// =====================================================
+
+function updateButtons() {
+
+    document
+        .getElementById(
+            "orthoButton"
+        )
+        .classList.toggle(
+            "active",
+            orthoMode
+        );
+
+
+    document
+        .getElementById(
+            "polarButton"
+        )
+        .classList.toggle(
+            "active",
+            polarMode
+        );
+
+
+    document
+        .getElementById(
+            "parallelButton"
+        )
+        .classList.toggle(
+            "active",
+            parallelMode
+        );
+
+
+    document
+        .getElementById(
+            "perpendicularButton"
+        )
+        .classList.toggle(
+            "active",
+            perpendicularMode
+        );
+
+}
+
+
+// =====================================================
+// DIMENSION TOGGLE
+// =====================================================
+
+function toggleDimensions() {
+
+    dimensionsVisible =
+        !dimensionsVisible;
+
+
+    document.getElementById(
+        "dimensionButton"
+    ).textContent =
+
+        dimensionsVisible
+            ? "Dimensions: ON"
+            : "Dimensions: OFF";
+
+
+    redraw();
+
+}
+
+
+// =====================================================
+// SAME POINT
+// =====================================================
+
+function samePoint(
+    a,
+    b
+) {
+
+    return (
+
+        Math.abs(
+            a.x - b.x
+        )
+        <
+        0.000001
+
+        &&
+
+        Math.abs(
+            a.y - b.y
+        )
+        <
+        0.000001
+
+    );
+
+}
+
+
+// =====================================================
+// ORIENTATION
+// =====================================================
+
+function orientation(
+    a,
+    b,
+    c
+) {
+
+    const value =
+
+        (
+            b.y - a.y
+        )
+        *
+        (
+            c.x - b.x
+        )
+
+        -
+
+        (
+            b.x - a.x
+        )
+        *
+        (
+            c.y - b.y
+        );
+
+
+    if (
+        Math.abs(value)
+        < 0.0000001
+    ) {
+
+        return 0;
+
+    }
+
+
+    return value > 0
+        ? 1
+        : 2;
+
+}
+
+
+// =====================================================
+// POINT ON SEGMENT
+// =====================================================
+
+function onSegment(
+    a,
+    b,
+    c
+) {
+
+    const tolerance =
+        0.000001;
+
+
+    return (
+
+        b.x <=
+        Math.max(
+            a.x,
+            c.x
+        )
+        +
+        tolerance
+
+        &&
+
+        b.x >=
+        Math.min(
+            a.x,
+            c.x
+        )
+        -
+        tolerance
+
+        &&
+
+        b.y <=
+        Math.max(
+            a.y,
+            c.y
+        )
+        +
+        tolerance
+
+        &&
+
+        b.y >=
+        Math.min(
+            a.y,
+            c.y
+        )
+        -
+        tolerance
+
+    );
+
+}
+
+
+// =====================================================
+// SEGMENT INTERSECTION
+// =====================================================
+
+function segmentsIntersect(
+    p1,
+    p2,
+    q1,
+    q2
+) {
+
+    const o1 =
+        orientation(
+            p1,
+            p2,
+            q1
+        );
+
+
+    const o2 =
+        orientation(
+            p1,
+            p2,
+            q2
+        );
+
+
+    const o3 =
+        orientation(
+            q1,
+            q2,
+            p1
+        );
+
+
+    const o4 =
+        orientation(
+            q1,
+            q2,
+            p2
+        );
+
+
+    if (
+        o1 !== o2
+        &&
+        o3 !== o4
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        o1 === 0
+        &&
+        onSegment(
+            p1,
+            q1,
+            p2
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        o2 === 0
+        &&
+        onSegment(
+            p1,
+            q2,
+            p2
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        o3 === 0
+        &&
+        onSegment(
+            q1,
+            p1,
+            q2
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        o4 === 0
+        &&
+        onSegment(
+            q1,
+            p2,
+            q2
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+// =====================================================
+// SELF INTERSECTION CHECK
+// =====================================================
+
+function wouldCreateIntersection(
+    start,
+    end,
+    closing
+) {
+
+    if (
+        points.length < 2
+    ) {
+
+        return false;
+
+    }
+
+
+    for (
+        let i = 0;
+        i <
+        points.length - 1;
+        i++
+    ) {
+
+        const a =
+            points[i];
+
+
+        const b =
+            points[
+                i + 1
+            ];
+
+
+        if (
+            samePoint(
+                b,
+                start
+            )
+        ) {
+
+            continue;
+
+        }
+
+
+        if (
+            closing
+            &&
+            samePoint(
+                a,
+                end
+            )
+        ) {
+
+            continue;
+
+        }
+
+
+        if (
+            segmentsIntersect(
+                start,
+                end,
+                a,
+                b
+            )
+        ) {
+
+            return true;
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+// =====================================================
+// DRAW GRID
+// =====================================================
+
+function drawGrid() {
+
+    const width =
+        canvas.clientWidth;
+
+
+    const height =
+        canvas.clientHeight;
+
+
+    const left =
+        -origin.x /
+        PIXELS_PER_UNIT;
+
+
+    const right =
+        (
+            width -
+            origin.x
+        )
+        /
+        PIXELS_PER_UNIT;
+
+
+    const bottom =
+        (
+            origin.y -
+            height
+        )
+        /
+        PIXELS_PER_UNIT;
+
+
+    const top =
+        origin.y /
+        PIXELS_PER_UNIT;
+
+
+    ctx.save();
+
+
+    ctx.strokeStyle =
+        "#f1f1f1";
+
+
+    ctx.lineWidth = 1;
+
+
+    const startX =
+        Math.floor(
+            left /
+            SNAP_SPACING
+        )
+        *
+        SNAP_SPACING;
+
+
+    for (
+        let x = startX;
+
+        x <= right;
+
+        x += SNAP_SPACING
+    ) {
+
+        if (
+            Math.abs(
+                x -
+                Math.round(x)
+            )
+            <
+            0.0001
+        ) {
+
+            continue;
+
+        }
+
+
+        const sx =
+            worldToScreen({
+
+                x: x,
+                y: 0
+
+            }).x;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            sx,
+            0
+        );
+
+        ctx.lineTo(
+            sx,
+            height
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    const startY =
+        Math.floor(
+            bottom /
+            SNAP_SPACING
+        )
+        *
+        SNAP_SPACING;
+
+
+    for (
+        let y = startY;
+
+        y <= top;
+
+        y += SNAP_SPACING
+    ) {
+
+        if (
+            Math.abs(
+                y -
+                Math.round(y)
+            )
+            <
+            0.0001
+        ) {
+
+            continue;
+
+        }
+
+
+        const sy =
+            worldToScreen({
+
+                x: 0,
+                y: y
+
+            }).y;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            sy
+        );
+
+        ctx.lineTo(
+            width,
+            sy
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    ctx.strokeStyle =
+        "#dddddd";
+
+
+    const majorStartX =
+        Math.floor(left);
+
+
+    for (
+        let x = majorStartX;
+
+        x <= right;
+
+        x += GRID_SPACING
+    ) {
+
+        const sx =
+            worldToScreen({
+
+                x: x,
+                y: 0
+
+            }).x;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            sx,
+            0
+        );
+
+        ctx.lineTo(
+            sx,
+            height
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    const majorStartY =
+        Math.floor(bottom);
+
+
+    for (
+        let y = majorStartY;
+
+        y <= top;
+
+        y += GRID_SPACING
+    ) {
+
+        const sy =
+            worldToScreen({
+
+                x: 0,
+                y: y
+
+            }).y;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            sy
+        );
+
+        ctx.lineTo(
+            width,
+            sy
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    const zero =
+        worldToScreen({
+
+            x: 0,
+            y: 0
+
+        });
+
+
+    ctx.strokeStyle =
+        "#888";
+
+
+    ctx.lineWidth = 1.5;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        zero.y
+    );
+
+    ctx.lineTo(
+        width,
+        zero.y
+    );
+
+    ctx.stroke();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        zero.x,
+        0
+    );
+
+    ctx.lineTo(
+        zero.x,
+        height
+    );
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+        "#666";
+
+
+    ctx.font =
+        "11px Arial";
+
+
+    ctx.fillText(
+        "0,0",
+        zero.x + 5,
+        zero.y - 6
+    );
+
+
+    ctx.restore();
+
+}
+
+
+// =====================================================
+// DRAW SHAPE
+// =====================================================
+
+function drawShape() {
+
+    if (
+        points.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    ctx.save();
+
+
+    if (
+        shapeClosed
+    ) {
+
+        ctx.beginPath();
+
+
+        let first =
+            worldToScreen(
+                points[0]
+            );
+
+
+        ctx.moveTo(
+            first.x,
+            first.y
+        );
+
+
+        for (
+            let i = 1;
+            i < points.length;
+            i++
+        ) {
+
+            const p =
+                worldToScreen(
+                    points[i]
+                );
+
+
+            ctx.lineTo(
+                p.x,
+                p.y
+            );
+
+        }
+
+
+        ctx.closePath();
+
+
+        ctx.fillStyle =
+            "rgba(23,105,224,0.08)";
+
+
+        ctx.fill();
+
+    }
+
+
+    ctx.beginPath();
+
+
+    const first =
+        worldToScreen(
+            points[0]
+        );
+
+
+    ctx.moveTo(
+        first.x,
+        first.y
+    );
+
+
+    for (
+        let i = 1;
+        i < points.length;
+        i++
+    ) {
+
+        const p =
+            worldToScreen(
+                points[i]
+            );
+
+
+        ctx.lineTo(
+            p.x,
+            p.y
+        );
+
+    }
+
+
+    if (
+        shapeClosed
+    ) {
+
+        ctx.closePath();
+
+    }
+
+
+    ctx.strokeStyle =
+        "#1769e0";
+
+
+    ctx.lineWidth = 3;
+
+
+    ctx.stroke();
+
+
+    points.forEach(
+        function(point, index) {
+
+            const p =
+                worldToScreen(
+                    point
+                );
+
+
+            ctx.beginPath();
+
+
+            ctx.arc(
+
+                p.x,
+
+                p.y,
+
+                index === 0
+                    ? 8
+                    : 5,
+
+                0,
+
+                Math.PI * 2
+
+            );
+
+
+            ctx.fillStyle =
+                index === 0
+                    ? "#18a558"
+                    : "#1769e0";
+
+
+            ctx.fill();
+
+
+            ctx.fillStyle =
+                "#111";
+
+
+            ctx.font =
+                "bold 11px Arial";
+
+
+            ctx.fillText(
+
+                index === 0
+                    ? "P1 / START"
+                    : "P" +
+                      (
+                          index + 1
+                      ),
+
+                p.x + 9,
+
+                p.y - 9
+
+            );
+
+        }
+    );
+
+
+    if (
+        dimensionsVisible
+    ) {
+
+        drawDimensions();
+
+    }
+
+
+    ctx.restore();
+
+}
+
+
+// =====================================================
+// DRAW DIMENSIONS
+// =====================================================
+
+function drawDimensions() {
+
+    const count =
+        shapeClosed
+            ? points.length
+            : points.length - 1;
+
+
+    for (
+        let i = 0;
+        i < count;
+        i++
+    ) {
+
+        const p1 =
+            points[i];
+
+
+        const p2 =
+            points[
+                (
+                    i + 1
+                )
+                %
+                points.length
+            ];
+
+
+        const s1 =
+            worldToScreen(
+                p1
+            );
+
+
+        const s2 =
+            worldToScreen(
+                p2
+            );
+
+
+        const drawingLength =
+            distance(
+                p1,
+                p2
+            );
+
+
+        const realLength =
+            drawingLength *
+            realWorldPerUnit;
+
+
+        const angle =
+            calculateAngle(
+                p1,
+                p2
+            );
+
+
+        const midX =
+            (
+                s1.x +
+                s2.x
+            )
+            /
+            2;
+
+
+        const midY =
+            (
+                s1.y +
+                s2.y
+            )
+            /
+            2;
+
+
+        const text =
+
+            realLength.toFixed(2)
+            +
+            " "
+            +
+            selectedUnit
+            +
+            " | "
+            +
+            angle.toFixed(1)
+            +
+            "°";
+
+
+        ctx.font =
+            "bold 11px Arial";
+
+
+        const width =
+            ctx.measureText(
+                text
+            ).width;
+
+
+        ctx.fillStyle =
+            "rgba(255,255,255,0.94)";
+
+
+        ctx.fillRect(
+
+            midX -
+            width / 2 -
+            5,
+
+            midY -
+            10,
+
+            width + 10,
+
+            19
+
+        );
+
+
+        ctx.fillStyle =
+            "#222";
+
+
+        ctx.fillText(
+
+            text,
+
+            midX -
+            width / 2,
+
+            midY + 4
+
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// PREVIEW
+// =====================================================
+
+function drawPreview() {
+
+    if (
+        !snappedPoint
+        ||
+        points.length === 0
+        ||
+        shapeClosed
+    ) {
+
+        return;
+
+    }
+
+
+    const start =
+        points[
+            points.length - 1
+        ];
+
+
+    const s1 =
+        worldToScreen(
+            start
+        );
+
+
+    const s2 =
+        worldToScreen(
+            snappedPoint
+        );
+
+
+    const drawingLength =
+        distance(
+            start,
+            snappedPoint
+        );
+
+
+    const realLength =
+        drawingLength *
+        realWorldPerUnit;
+
+
+    const angle =
+        calculateAngle(
+            start,
+            snappedPoint
+        );
+
+
+    ctx.save();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        s1.x,
+        s1.y
+    );
+
+    ctx.lineTo(
+        s2.x,
+        s2.y
+    );
+
+
+    ctx.strokeStyle =
+
+        (
+            lockedLength !== null
+            ||
+            lockedAngle !== null
+        )
+
+            ? "#f59e0b"
+
+            : "#777";
+
+
+    ctx.lineWidth = 2;
+
+
+    ctx.setLineDash([
+        7,
+        5
+    ]);
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+
+    ctx.fillStyle =
+        "#111";
+
+
+    ctx.font =
+        "bold 11px Arial";
+
+
+    ctx.fillText(
+
+        realLength.toFixed(2)
+        +
+        " "
+        +
+        selectedUnit
+        +
+        " | "
+        +
+        angle.toFixed(2)
+        +
+        "°",
+
+        s2.x + 10,
+
+        s2.y - 10
+
+    );
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+
+        s2.x,
+
+        s2.y,
+
+        6,
+
+        0,
+
+        Math.PI * 2
+
+    );
+
+
+    ctx.strokeStyle =
+
+        lockedAngle !== null
+            ? "#f59e0b"
+
+            :
+
+        orthoMode
+            ? "#1769e0"
+
+            :
+
+        polarMode
+            ? "#9b59b6"
+
+            :
+
+        parallelMode
+            ? "#18a558"
+
+            :
+
+        perpendicularMode
+            ? "#e67e22"
+
+            :
+
+        "#1769e0";
+
+
+    ctx.lineWidth = 2;
+
+    ctx.stroke();
+
+}
+
+
+// =====================================================
+// AREA & PERIMETER
+// =====================================================
+
+function calculateArea() {
+
+    if (
+        !shapeClosed
+        ||
+        points.length < 3
+    ) {
+
+        return 0;
+
+    }
+
+
+    let area = 0;
+
+
+    for (
+        let i = 0;
+        i < points.length;
+        i++
+    ) {
+
+        const p1 =
+            points[i];
+
+
+        const p2 =
+            points[
+                (
+                    i + 1
+                )
+                %
+                points.length
+            ];
+
+
+        area +=
+
+            p1.x *
+            p2.y
+
+            -
+
+            p2.x *
+            p1.y;
+
+    }
+
+
+    const drawingArea =
+        Math.abs(
+            area / 2
+        );
+
+
+    return (
+
+        drawingArea *
+        realWorldPerUnit *
+        realWorldPerUnit
+
+    );
+
+}
+
+
+function calculatePerimeter() {
+
+    if (
+        !shapeClosed
+    ) {
+
+        return 0;
+
+    }
+
+
+    let perimeter = 0;
+
+
+    for (
+        let i = 0;
+        i < points.length;
+        i++
+    ) {
+
+        const p1 =
+            points[i];
+
+
+        const p2 =
+            points[
+                (
+                    i + 1
+                )
+                %
+                points.length
+            ];
+
+
+        perimeter +=
+            distance(
+                p1,
+                p2
+            );
+
+    }
+
+
+    return (
+
+        perimeter *
+        realWorldPerUnit
+
+    );
+
+}
+
+
+// =====================================================
+// UPDATE INFORMATION
+// =====================================================
+
+function updateInformation() {
+
+    document.getElementById(
+        "pointCount"
+    ).textContent =
+        points.length;
+
+
+    let segments =
+        Math.max(
+            0,
+            points.length - 1
+        );
+
+
+    if (
+        shapeClosed
+    ) {
+
+        segments++;
+
+    }
+
+
+    document.getElementById(
+        "segmentCount"
+    ).textContent =
+        segments;
+
+
+    document.getElementById(
+        "areaValue"
+    ).textContent =
+        calculateArea()
+        .toFixed(2);
+
+
+    document.getElementById(
+        "perimeterValue"
+    ).textContent =
+        calculatePerimeter()
+        .toFixed(2);
+
+
+    if (
+        points.length > 0
+        &&
+        snappedPoint
+    ) {
+
+        const last =
+            points[
+                points.length - 1
+            ];
+
+
+        const length =
+            distance(
+                last,
+                snappedPoint
+            )
+            *
+            realWorldPerUnit;
+
+
+        const angle =
+            calculateAngle(
+                last,
+                snappedPoint
+            );
+
+
+        document.getElementById(
+            "lineInfo"
+        ).textContent =
+
+            length.toFixed(2)
+            +
+            " "
+            +
+            selectedUnit
+            +
+            " @ "
+            +
+            angle.toFixed(2)
+            +
+            "°";
+
+    }
+
+
+    let mode = "Free";
+
+
+    if (
+        lockedLength !== null
+        &&
+        lockedAngle !== null
+    ) {
+
+        mode =
+            "Exact Length + Angle";
+
+    }
+    else if (
+        lockedLength !== null
+    ) {
+
+        mode =
+            "Exact Length";
+
+    }
+    else if (
+        lockedAngle !== null
+    ) {
+
+        mode =
+            "Exact Angle";
+
+    }
+    else if (
+        orthoMode
+    ) {
+
+        mode =
+            "F8 Ortho";
+
+    }
+    else if (
+        polarMode
+    ) {
+
+        mode =
+            "F10 Polar";
+
+    }
+    else if (
+        parallelMode
+    ) {
+
+        mode =
+            "Parallel";
+
+    }
+    else if (
+        perpendicularMode
+    ) {
+
+        mode =
+            "Perpendicular";
+
+    }
+
+
+    document.getElementById(
+        "modeInfo"
+    ).textContent =
+        mode;
+
+}
+
+
+// =====================================================
+// STATUS
+// =====================================================
+
+function updateStatus(
+    message
+) {
+
+    document.getElementById(
+        "status"
+    ).textContent =
+        message;
+
+
+    updateInformation();
+
+}
+
+
+// =====================================================
+// UNDO
+// =====================================================
+
+function undoPoint() {
+
+    if (
+        points.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    shapeClosed = false;
+
+
+    points.pop();
+
+
+    clearConstraints();
+
+
+    updateStatus(
+        "Last point removed."
+    );
+
+
+    redraw();
+
+}
+
+
+// =====================================================
+// CLEAR
+// =====================================================
+
+function clearDrawing() {
+
+    points = [];
+
+    shapeClosed = false;
+
+    currentPointer = null;
+
+    snappedPoint = null;
+
+    lockedLength = null;
+
+    lockedAngle = null;
+
+    numberBuffer = "";
+
+
+    document.getElementById(
+        "dynamicInput"
+    ).style.display =
+        "none";
+
+
+    updateStatus(
+        "Click anywhere to create P1."
+    );
+
+
+    redraw();
+
+}
+
+
+// =====================================================
+// FINISH
+// =====================================================
+
+function finishPlot() {
+
+    if (
+        points.length < 3
+    ) {
+
+        updateStatus(
+            "A plot requires at least 3 points."
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        !shapeClosed
+    ) {
+
+        updateStatus(
+            "Return to P1 to close the plot first."
+        );
+
+
+        return;
+
+    }
+
+
+    const area =
+        calculateArea();
+
+
+    const perimeter =
+        calculatePerimeter();
+
+
+    updateStatus(
+
+        "✓ Plot complete | Area: "
+        +
+        area.toFixed(2)
+        +
+        " "
+        +
+        selectedUnit
+        +
+        "² | Perimeter: "
+        +
+        perimeter.toFixed(2)
+        +
+        " "
+        +
+        selectedUnit
+
+    );
+
+
+    console.log(
+        "Plot coordinates:",
+        points
+    );
+
+    openPlanner();
+
+}
+
+
+
+
+// =====================================================
+// HOUSE SPACE PLANNER
+// =====================================================
+let generatedLayout=[];
+let plannerVisible=false;
+window.selectedPlanFloor=1;
+
+const ROOM_TYPES={
+ master:{label:'Master Bedroom',minW:10,minH:12,prefW:13,prefH:14,priority:100,kind:'room'},
+ bedroom:{label:'Bedroom',minW:9,minH:10,prefW:11,prefH:12,priority:95,kind:'room'},
+ living:{label:'Living Room',minW:12,minH:12,prefW:16,prefH:16,priority:90,kind:'room'},
+ dining:{label:'Dining',minW:8,minH:9,prefW:10,prefH:12,priority:75,kind:'room'},
+ kitchen:{label:'Kitchen',minW:8,minH:8,prefW:10,prefH:11,priority:85,kind:'room'},
+ bath:{label:'Bathroom',minW:5,minH:7,prefW:6,prefH:8,priority:80,kind:'room'},
+ utility:{label:'Utility',minW:5,minH:6,prefW:7,prefH:8,priority:45,kind:'room'},
+ stairs:{label:'Staircase',minW:7,minH:10,prefW:8,prefH:12,priority:70,kind:'room'},
+ garden:{label:'Garden',minW:8,minH:8,prefW:12,prefH:12,priority:30,kind:'open'},
+ court:{label:'Courtyard',minW:8,minH:8,prefW:10,prefH:10,priority:35,kind:'open'},
+ parking:{label:'Parking',minW:8,minH:16,prefW:9,prefH:18,priority:25,kind:'open'}
+};
+
+const ROOM_STYLES={master:'#f8d7da',bedroom:'#fde2e4',living:'#dbeafe',dining:'#e0f2fe',kitchen:'#fef3c7',bath:'#dbeafe',utility:'#e5e7eb',stairs:'#ede9fe',garden:'#dcfce7',court:'#d1fae5',parking:'#e5e7eb'};
+
+function plannerNumber(id,fallback=0){const n=parseFloat(document.getElementById(id)?.value);return Number.isFinite(n)?Math.max(0,n):fallback;}
+
+function getPlannerConfig(){
+    return{
+        floors:Math.max(1,Math.round(plannerNumber('pFloors',1))),
+        setback:plannerNumber('pSetback',5),
+        corridor:plannerNumber('pCorridor',4),
+        master:Math.round(plannerNumber('pMaster',1)),
+        bedroom:Math.round(plannerNumber('pBeds',2)),
+        bath:Math.round(plannerNumber('pBaths',3)),
+        living:Math.round(plannerNumber('pLiving',1)),
+        dining:Math.round(plannerNumber('pDining',1)),
+        kitchen:Math.round(plannerNumber('pKitchen',1)),
+        utility:Math.round(plannerNumber('pUtility',0)),
+        stairs:Math.round(plannerNumber('pStairs',1)),
+        garden:Math.round(plannerNumber('pGarden',1)),
+        court:Math.round(plannerNumber('pCourt',0)),
+        parking:Math.round(plannerNumber('pParking',2))
+    };
+}
+
+function makeRoomRequests(cfg){
+    const list=[];
+    const add=(type,count)=>{
+        for(let i=0;i<count;i++) list.push({type});
+    };
+    add('master',cfg.master);
+    add('bedroom',cfg.bedroom);
+    add('living',cfg.living);
+    add('kitchen',cfg.kitchen);
+    add('bath',cfg.bath);
+    add('dining',cfg.dining);
+    add('stairs',cfg.stairs);
+    add('utility',cfg.utility);
+    add('court',cfg.court);
+    add('garden',cfg.garden);
+    add('parking',cfg.parking);
+
+    return list.sort((a,b)=>(ROOM_TYPES[b.type]?.priority||0)-(ROOM_TYPES[a.type]?.priority||0));
+}
+
+function togglePlanner(force){
+    const panel=document.getElementById('plannerPanel');
+    if(force===true)plannerVisible=true;
+    else if(force===false)plannerVisible=false;
+    else plannerVisible=!plannerVisible;
+    panel.style.display=plannerVisible?'block':'none';
+}
+
+function openPlanner(){
+    if(points.length<3||!shapeClosed){
+        updateStatus('Close the plot first, then open the House Planner.');
+        return;
+    }
+    togglePlanner(true);
+    document.getElementById('planSummary').innerHTML='Closed plot detected. Setbacks and space requirements are ready.';
+}
+
+function polygonSignedArea(poly){let a=0;for(let i=0;i<poly.length;i++){const p=poly[i],q=poly[(i+1)%poly.length];a+=p.x*q.y-q.x*p.y;}return a/2;}
+function polygonAreaAbs(poly){return Math.abs(polygonSignedArea(poly));}
+function pointInPolygon(p,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];const hit=((a.y>p.y)!=(b.y>p.y))&&(p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y+1e-12)+a.x);if(hit)inside=!inside;}return inside;}
+function pointSegDistance(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;if(l2===0)return distance(p,a);let t=((p.x-a.x)*dx+(p.y-a.y)*dy)/l2;t=Math.max(0,Math.min(1,t));return distance(p,{x:a.x+t*dx,y:a.y+t*dy});}
+function distanceToPolygon(p,poly){let d=Infinity;for(let i=0;i<poly.length;i++)d=Math.min(d,pointSegDistance(p,poly[i],poly[(i+1)%poly.length]));return d;}
+function orientationLocal(a,b,c){const v=(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);return Math.abs(v)<1e-9?0:(v>0?1:2);}
+function onSegmentLocal(a,b,c){return b.x<=Math.max(a.x,c.x)+1e-9&&b.x>=Math.min(a.x,c.x)-1e-9&&b.y<=Math.max(a.y,c.y)+1e-9&&b.y>=Math.min(a.y,c.y)-1e-9;}
+function segmentsIntersectLocal(p1,q1,p2,q2){const o1=orientationLocal(p1,q1,p2),o2=orientationLocal(p1,q1,q2),o3=orientationLocal(p2,q2,p1),o4=orientationLocal(p2,q2,q1);if(o1!==o2&&o3!==o4)return true;if(o1===0&&onSegmentLocal(p1,p2,q1))return true;if(o2===0&&onSegmentLocal(p1,q2,q1))return true;if(o3===0&&onSegmentLocal(p2,p1,q2))return true;if(o4===0&&onSegmentLocal(p2,q1,q2))return true;return false;}
+function rectCorners(r){return[{x:r.x,y:r.y},{x:r.x+r.w,y:r.y},{x:r.x+r.w,y:r.y+r.h},{x:r.x,y:r.y+r.h}];}
+function rectOverlap(a,b,gap){return!(a.x+a.w+gap<=b.x||b.x+b.w+gap<=a.x||a.y+a.h+gap<=b.y||b.y+b.h+gap<=a.y);}
+function boundsOfPolygon(poly){return poly.reduce((b,p)=>({minX:Math.min(b.minX,p.x),maxX:Math.max(b.maxX,p.x),minY:Math.min(b.minY,p.y),maxY:Math.max(b.maxY,p.y)}),{minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity});}
+function buildableBounds(poly,setback){
+    const b=boundsOfPolygon(poly);
+    const s=Math.max(0,setback);
+    return {minX:b.minX+s,maxX:b.maxX-s,minY:b.minY+s,maxY:b.maxY-s};
+}
+
+function roomFits(r,poly,setback,placed){
+    const c=rectCorners(r);
+    if(!c.every(p=>pointInPolygon(p,poly))) return false;
+    if(setback>0 && !c.every(p=>distanceToPolygon(p,poly)>=setback-1e-7)) return false;
+    for(let i=0;i<4;i++){
+        const a=c[i],b=c[(i+1)%4];
+        for(let j=0;j<poly.length;j++){
+            const q=poly[j],rSeg=poly[(j+1)%poly.length];
+            if(segmentsIntersectLocal(a,b,q,rSeg)) return false;
+        }
+    }
+    const gap=Math.max(.08,(realWorldPerUnit||1)*0.01);
+    return !placed.some(p=>p.type!=='corridor' && rectOverlap(r,p,gap));
+}
+
+function candidatePositions(bounds,w,h,step,seed=0){
+    const out=[];
+    const maxX=bounds.maxX-w, maxY=bounds.maxY-h;
+    if(maxX<bounds.minX || maxY<bounds.minY) return out;
+    const sx=bounds.minX + ((seed*37)%11)/11*Math.max(0,maxX-bounds.minX);
+    const sy=bounds.minY + ((seed*53)%13)/13*Math.max(0,maxY-bounds.minY);
+    for(let y=sy;y<=maxY+1e-9;y+=step){
+        for(let x=sx;x<=maxX+1e-9;x+=step) out.push({x,y});
+    }
+    for(let y=maxY;y>=bounds.minY-1e-9;y-=step){
+        for(let x=maxX;x>=bounds.minX-1e-9;x-=step) out.push({x,y});
+    }
+    return out;
+}
+
+function fitOneRoom(type,poly,bounds,placed,cfg,seed){
+    const t=ROOM_TYPES[type],scale=realWorldPerUnit||1;
+    const minW=t.minW/scale,minH=t.minH/scale;
+    const prefW=t.prefW/scale,prefH=t.prefH/scale;
+    const factors=[1,.92,.84,.76,.68,.60];
+    const variants=[];
+    for(const f of factors){
+        variants.push([prefW*f,prefH*f]);
+        variants.push([prefH*f,prefW*f]);
+    }
+    variants.push([minW,minH],[minH,minW]);
+    const step=Math.max(.12,Math.min(.45,4/scale));
+    for(const [w,h] of variants){
+        if(w<minW*.98 || h<minH*.98) continue;
+        const positions=candidatePositions(bounds,w,h,step,seed);
+        for(const pos of positions){
+            const r={x:pos.x,y:pos.y,w,h,type};
+            if(roomFits(r,poly,cfg.setback/scale,placed)) return r;
+        }
+    }
+    return null;
+}
+
+function generateFloorLayout(poly,cfg,floorIndex,seed){
+    const scale=realWorldPerUnit||1;
+    const setback=Math.max(0,cfg.setback/scale);
+    const bounds=buildableBounds(poly,setback);
+    const requests=makeRoomRequests(cfg);
+    const placed=[],failed=[];
+
+    const indoor=requests.filter(r=>ROOM_TYPES[r.type].kind==='room');
+    const outdoor=requests.filter(r=>ROOM_TYPES[r.type].kind==='open');
+    for(let k=0;k<indoor.length;k++){
+        const r=fitOneRoom(indoor[k].type,poly,bounds,placed,cfg,seed+k*7);
+        if(r){r.floor=floorIndex;placed.push(r);} else failed.push(indoor[k]);
+    }
+    for(let k=0;k<outdoor.length;k++){
+        const r=fitOneRoom(outdoor[k].type,poly,bounds,placed,cfg,seed+100+k*11);
+        if(r){r.floor=floorIndex;placed.push(r);} else failed.push(outdoor[k]);
+    }
+
+    const rooms=placed.filter(r=>ROOM_TYPES[r.type]?.kind==='room');
+    if(rooms.length>1){
+        const minX=Math.min(...rooms.map(r=>r.x));
+        const maxX=Math.max(...rooms.map(r=>r.x+r.w));
+        const minY=Math.min(...rooms.map(r=>r.y));
+        const maxY=Math.max(...rooms.map(r=>r.y+r.h));
+        const corridorW=Math.max(.08,cfg.corridor/scale);
+        const cy=minY+(maxY-minY-corridorW)/2;
+        const corridor={x:minX,y:Math.max(minY,cy),w:maxX-minX,h:Math.min(corridorW,maxY-minY),type:'corridor',floor:floorIndex};
+        placed.push(corridor);
+    }
+    return {placed,failed,bounds,floor:floorIndex};
+}
+
+function generateHouseLayout(regenerate=false){
+    if(points.length<3 || !shapeClosed){
+        updateStatus('Finish a closed plot before generating a house layout.');
+        togglePlanner(true);
+        return;
+    }
+    const cfg=getPlannerConfig();
+    const all=[];
+    for(let floor=0;floor<cfg.floors;floor++){
+        let best=null;
+        for(let seed=0;seed<18;seed++){
+            const result=generateFloorLayout(points,cfg,floor+1,seed+(regenerate?31:0));
+            const score=result.failed.length*100000 - result.placed.filter(r=>r.type!=='corridor').reduce((a,r)=>a+r.w*r.h,0);
+            if(!best || score<best.score) best={...result,score};
+        }
+        all.push(best);
+    }
+    generatedLayout=all;
+    window.selectedPlanFloor=1;
+    togglePlanner(true);
+    updatePlanSummary(cfg,all);
+    buildLegend();
+    redraw();
+    const failed=all.reduce((s,f)=>s+f.failed.length,0);
+    updateStatus(failed===0?'✓ House layout generated successfully.':'⚠ Layout generated. Some requested spaces could not fit.');
+}
+
+function updatePlanSummary(cfg,floors){
+    const requested=makeRoomRequests(cfg).length*cfg.floors;
+    const failed=floors.reduce((s,f)=>s+f.failed.length,0);
+    const plotArea=calculateArea();
+    let text=`<strong>Plot:</strong> ${plotArea.toFixed(1)} ${selectedUnit}²<br><strong>Floors:</strong> ${cfg.floors} &nbsp; <strong>Setback:</strong> ${cfg.setback} ${selectedUnit}<br><strong>Requested spaces:</strong> ${requested}<br><strong>Unplaced:</strong> ${failed}`;
+    text+=failed===0?`<br><span class="planGood">All requested spaces placed.</span>`:`<br><span class="planWarning">Some spaces could not fit. Increase plot size, reduce setback, reduce room count, or regenerate.</span>`;
+    document.getElementById('planSummary').innerHTML=text;
+}
+
+function buildLegend(){
+    const el=document.getElementById('roomLegend');
+    el.innerHTML='';
+    const used=[...new Set(generatedLayout.flatMap(f=>f.placed.map(r=>r.type)).filter(t=>t!=='corridor'))];
+    for(const t of used){
+        const d=document.createElement('div');
+        d.className='legendItem';
+        d.innerHTML=`<span class="legendSwatch" style="background:${ROOM_STYLES[t]||'#fff'}"></span>${ROOM_TYPES[t]?.label||t}`;
+        el.appendChild(d);
+    }
+}
+
+function clearHouseLayout(){
+    generatedLayout=[];
+    document.getElementById('planSummary').innerHTML='Layout cleared. The plot remains available for another generation.';
+    document.getElementById('roomLegend').innerHTML='';
+    redraw();
+}
+
+function drawPolygonPath(poly){
+    if(!poly.length)return;
+    ctx.beginPath();
+    const s=worldToScreen(poly[0]);
+    ctx.moveTo(s.x,s.y);
+    for(let i=1;i<poly.length;i++){
+        const q=worldToScreen(poly[i]);
+        ctx.lineTo(q.x,q.y);
+    }
+    ctx.closePath();
+}
+
+function drawSetbackZone(poly,setback){
+    const b=buildableBounds(poly,setback);
+    ctx.save();
+    drawPolygonPath(poly);
+    ctx.fillStyle='rgba(245,158,11,.08)';
+    ctx.fill();
+    ctx.setLineDash([6,5]);
+    ctx.strokeStyle='#f59e0b';
+    ctx.lineWidth=1.5;
+    drawPolygonPath(poly);
+    ctx.stroke();
+    const x0=b.minX,y0=b.minY,x1=b.maxX,y1=b.maxY;
+    if(x1>x0&&y1>y0){
+        ctx.setLineDash([4,4]);
+        ctx.strokeStyle='#16a34a';
+        ctx.lineWidth=2;
+        const a=worldToScreen({x:x0,y:y0}),c=worldToScreen({x:x1,y:y1});
+        ctx.strokeRect(a.x,c.y,c.x-a.x,a.y-c.y);
+        ctx.setLineDash([]);
+        ctx.font='10px Arial';
+        ctx.fillStyle='#15803d';
+        ctx.fillText('approx. buildable zone',a.x+4,a.y+14);
+    }
+    ctx.restore();
+}
+
+function drawGeneratedLayout(){
+    if(!generatedLayout.length||!shapeClosed)return;
+    const cfg=getPlannerConfig(),scale=realWorldPerUnit||1;
+    drawSetbackZone(points,cfg.setback/scale);
+    for(const floor of generatedLayout){
+        if(floor.floor!==window.selectedPlanFloor)continue;
+        const cr=floor.placed.find(r=>r.type==='corridor');
+        if(cr){
+            const s=worldToScreen({x:cr.x,y:cr.y}),e=worldToScreen({x:cr.x+cr.w,y:cr.y+cr.h});
+            ctx.save();
+            ctx.globalAlpha=.12;
+            ctx.fillStyle='#7c3aed';
+            ctx.fillRect(s.x,e.y,e.x-s.x,s.y-e.y);
+            ctx.globalAlpha=1;
+            ctx.setLineDash([7,5]);
+            ctx.strokeStyle='#7c3aed';
+            ctx.lineWidth=1.2;
+            ctx.strokeRect(s.x,e.y,e.x-s.x,s.y-e.y);
+            ctx.restore();
+        }
+        for(const r of floor.placed){
+            if(r.type==='corridor')continue;
+            const s=worldToScreen({x:r.x,y:r.y}),e=worldToScreen({x:r.x+r.w,y:r.y+r.h});
+            ctx.save();
+            ctx.fillStyle=ROOM_STYLES[r.type]||'#fff';
+            ctx.globalAlpha=.72;
+            ctx.fillRect(s.x,e.y,e.x-s.x,s.y-e.y);
+            ctx.globalAlpha=1;
+            ctx.strokeStyle='#374151';
+            ctx.lineWidth=1.5;
+            ctx.strokeRect(s.x,e.y,e.x-s.x,s.y-e.y);
+            const label=ROOM_TYPES[r.type]?.label||r.type,realW=r.w*scale,realH=r.h*scale,area=realW*realH,cx=(s.x+e.x)/2,cy=(s.y+e.y)/2;
+            ctx.fillStyle='#111827';
+            ctx.font='bold 11px Arial';
+            ctx.textAlign='center';
+            ctx.textBaseline='middle';
+            ctx.fillText(label,cx,cy-7);
+            ctx.font='10px Arial';
+            ctx.fillText(`${realW.toFixed(1)} × ${realH.toFixed(1)} ${selectedUnit} | ${area.toFixed(0)} ${selectedUnit}²`,cx,cy+8);
+            ctx.restore();
+        }
+    }
+}
+
+window.addEventListener('keydown',e=>{
+    if(e.key>='1'&&e.key<='9'&&generatedLayout.length){
+        const n=parseInt(e.key);
+        if(n<=generatedLayout.length){
+            window.selectedPlanFloor=n;
+            redraw();
+            updateStatus(`Showing generated floor ${n}.`);
+        }
+    }
+});
+
+// =====================================================
+// REDRAW
+// =====================================================
+
+function redraw() {
+
+    const width =
+        canvas.clientWidth;
+
+
+    const height =
+        canvas.clientHeight;
+
+
+    ctx.clearRect(
+
+        0,
+        0,
+        width,
+        height
+
+    );
+
+
+    drawGrid();
+
+    drawShape();
+
+    drawGeneratedLayout();
+
+    drawPreview();
+
+    updateInformation();
+
+    updateScaleDisplay();
+
+}
+
+
+// =====================================================
+// INITIALIZE
+// =====================================================
+
+updateScale();
+
+resizeCanvas();
+
+redraw();
+
+</script>
+
+</body>
+
+</html>
